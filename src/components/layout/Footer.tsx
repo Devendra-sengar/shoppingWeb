@@ -42,10 +42,11 @@ export const Footer: React.FC = () => {
           <div className="space-y-3">
             <h4 className="text-xs uppercase tracking-luxury font-semibold text-primary">Concierge</h4>
             <ul className="space-y-2 text-sm text-secondary">
+              <li><Link to="/track-order" className="text-amber-900 font-medium hover:underline">Track Your Order</Link></li>
               <li><Link to="/about" className="hover:text-primary transition-colors">Our Atelier</Link></li>
               <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
-              <li><Link to="/faq" className="hover:text-primary transition-colors">Frequently Asked Questions</Link></li>
               <li><Link to="/shipping-returns" className="hover:text-primary transition-colors">Shipping & Returns</Link></li>
+              <li><Link to="/admin" className="text-stone-400 hover:text-stone-700 text-xs mt-1 block">Staff Admin Console →</Link></li>
             </ul>
           </div>
 

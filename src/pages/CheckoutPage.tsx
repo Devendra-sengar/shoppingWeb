@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useCartStore } from '../stores/useCartStore';
 import { useCurrencyStore } from '../stores/useCurrencyStore';
+import { useAdminStore } from '../stores/useAdminStore';
 import { formatPrice, getPriceAmount } from '../utils/formatCurrency';
 import type { OrderReceipt } from '../types';
 
@@ -42,6 +43,7 @@ export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { cart, getSubtotal, getTaxes, getGrandTotal, clearCart } = useCartStore();
   const { selectedCurrency } = useCurrencyStore();
+  const { createOrder } = useAdminStore();
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
@@ -232,6 +234,39 @@ export const CheckoutPage: React.FC = () => {
 
     // Store receipt snapshot in sessionStorage so clearing cart doesn't erase it
     sessionStorage.setItem('elan-latest-receipt', JSON.stringify(receipt));
+
+    // Save to persistent Admin Order store
+    createOrder({
+      orderReference: demoOrderId,
+      trackingToken: `trk_${Math.random().toString(36).substring(2, 8)}`,
+      customer: receipt.customer,
+      shippingAddress: receipt.shippingAddress,
+      items: receipt.items.map((it) => ({
+        productId: it.id,
+        name: it.name,
+        thumbnail: it.gallery[0] || '',
+        quantity: it.quantity,
+        selectedAttributes: it.userSelectedAttributes,
+        unitPrice: getPriceAmount(it.prices, receipt.currencySymbol),
+        discount: 0,
+        tax: (getPriceAmount(it.prices, receipt.currencySymbol) * 0.21),
+        total: getPriceAmount(it.prices, receipt.currencySymbol) * it.quantity * 1.21,
+      })),
+      currencySymbol: receipt.currencySymbol,
+      currencyCode: selectedCurrency.label,
+      subtotal: receipt.subtotal,
+      discount: 0,
+      taxes: receipt.taxes,
+      shippingCharge: 0,
+      grandTotal: receipt.total,
+      paymentMethod: paymentType,
+      paymentStatus: paymentType === 'cod' ? 'cod_pending' : 'paid',
+      paymentReference: paymentDetailInfo,
+      fulfillmentStatus: 'received',
+      shipmentStatus: 'pending',
+      returnStatus: 'none',
+      isDemo: false,
+    });
 
     // Directly open WhatsApp with order details in new tab/app
     window.open(whatsappUrl, '_blank');
